@@ -16,47 +16,83 @@ namespace RESTfulWebAPITask1.Controllers
 
         // GET: api/<ProductController>
         [HttpGet]
-        public IEnumerable<Product> Get()
+        public IActionResult Get()
         {
-            return _dbContext.Products.ToList();
+            var product = _dbContext.Products.ToList();
+            if (product == null)
+                return NotFound(new { Message = "There is no any product available" });
+
+            return Ok(product);
         }
 
         // GET api/<ProductController>/5
         [HttpGet("{id}")]
-        public Product Get(int id)
+        public IActionResult Get(int id)
         {
-            return _dbContext.Products.Find(id);
+            var product = _dbContext.Products.Find(id);
+            if (product == null)
+                return NotFound(new { Message = "Product not found" });
+
+            return Ok(product);
         }
 
 
         // POST api/<ProductController>
         [HttpPost]
-        public void Post(Product product)
+        public IActionResult Post(Product product)
         {
+            if (product == null)
+                return BadRequest("Product details are required");
+
+            //Category logic
+            if (product.CategoryId != null && product.CategoryId > 0)
+            {
+                var category = _dbContext.Categories.Find(product.CategoryId);
+                if (category == null)
+                    return NotFound(new { Message = "Category Id not found" });
+            }
+            //
             _dbContext.Products.Add(product);
             _dbContext.SaveChanges();
+
+            return Ok(new { Message = "Product has been added successfully", Product = product });
         }
 
 
         // PUT api/<ProductController>/5
         [HttpPut("{id}")]
-        public void Put(int id, Product product)
+        public IActionResult Put(int id, Product product)
         {
+            if (product == null)
+                return BadRequest("Product details are required");
+            
+            //Category logic
+            if (product.CategoryId != null && product.CategoryId > 0)
+            {
+                var category = _dbContext.Categories.Find(product.CategoryId);
+                if (category == null)
+                    return NotFound(new { Message = "Category Id not found" });
+            }
+            //
             _dbContext.Products.Update(product);
             _dbContext.SaveChanges();
+
+            return Ok(new { Message = "Product has been added successfully", Product = product });
         }
 
 
         // DELETE api/<ProductController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
             var entity = _dbContext.Products.Find(id);
-            if (entity != null)
-            {
-                _dbContext.Products.Remove(entity);
-                _dbContext.SaveChanges();
-            }
+            if (entity == null)
+                return NotFound(new { Message = "Product not found" });
+            
+            _dbContext.Products.Remove(entity);
+            _dbContext.SaveChanges();
+
+            return Ok(new { Message = "Product deleted successfully" });
         }
     }
 }

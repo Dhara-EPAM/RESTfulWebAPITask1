@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RESTfulWebAPITask1;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +10,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<CatalogDbContext>();
+// Register the database context
+builder.Services.AddDbContext<CatalogDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("CartDbConnection")));
+
 
 var app = builder.Build();
 

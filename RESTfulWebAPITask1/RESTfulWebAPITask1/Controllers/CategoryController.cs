@@ -15,50 +15,87 @@ namespace RESTfulWebAPITask1.Controllers
 
         // GET: api/<CategoryController>
         [HttpGet]
-        public IEnumerable<Category> Get()
+        public IActionResult Get()
         {
-            return _dbContext.Categories.ToList();
+            var category = _dbContext.Categories.ToList();
+            if (category == null)
+                return NotFound(new { Message = "There is no any category available" });
+
+            return Ok(category);
         }
 
         // GET api/<CategoryController>/5
         [HttpGet("{id}")]
-        public Category Get(int id)
+        public IActionResult Get(int id)
         {
-            return _dbContext.Categories.Find(id);
+            var category = _dbContext.Categories.Find(id);
+            if (category == null)
+                return NotFound(new { Message = "Category not found" });
+
+            return Ok(category);
         }
 
         // POST api/<CategoryController>
         [HttpPost]
-        public void Post(Category category)
+        public IActionResult Post(Category category)
         {
+            if (category == null)
+                return BadRequest("Category details are required");
+
+            //Parent category id logic
+            if(category.ParentCategoryId != null && category.ParentCategoryId > 0)
+            {
+                var parentCategory = _dbContext.Categories.Find(category.ParentCategoryId);
+                if (parentCategory == null)
+                    return NotFound(new { Message = "Parent Category Id not found" });
+            }
+            //
             _dbContext.Categories.Add(category);
             _dbContext.SaveChanges();
+
+            return Ok(new { Message = "Category has been added successfully", Category = category });
         }
 
         // PUT api/<CategoryController>/5
         [HttpPut("{id}")]
-        public void Put(int id, Category category)
+        public IActionResult Put(int id, Category category)
         {
+            if (category == null)
+                return BadRequest("Category details are required");
+
+            //Parent category id logic
+            if (category.ParentCategoryId != null && category.ParentCategoryId > 0)
+            {
+                var parentCategory = _dbContext.Categories.Find(category.ParentCategoryId);
+                if (parentCategory == null)
+                    return NotFound(new { Message = "Parent Category Id not found" });
+            }
+            //
             _dbContext.Categories.Update(category);
             _dbContext.SaveChanges();
+
+            return Ok(new { Message = "Category has been added successfully", Category = category });
         }
 
         // DELETE api/<CategoryController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
             var entity = _dbContext.Categories.Find(id);
-            if (entity != null)
-            {
-                //Delete related products
-                var products = _dbContext.Products.ToList().Where(x => x.CategoryId == id);
-                _dbContext.Products.RemoveRange(products);
-                _dbContext.SaveChanges();
+            if (entity == null)
+                return NotFound(new { Message = "Category not found" });
+            
+            //Delete related products
+            var products = _dbContext.Products.ToList().Where(x => x.CategoryId == id);
+            _dbContext.Products.RemoveRange(products);
+            _dbContext.SaveChanges();
 
-                //Delete category
-                _dbContext.Categories.Remove(entity);
-                _dbContext.SaveChanges();
-            }
+            //Delete category
+            _dbContext.Categories.Remove(entity);
+            _dbContext.SaveChanges();
+
+             return Ok(new { Message = "Category deleted successfully" });
+         
         }
     }
 }
