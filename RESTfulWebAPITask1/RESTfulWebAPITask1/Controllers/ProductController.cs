@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RESTfulWebAPITask1.Model;
+using RESTfulWebAPITask1.Services;
 
 namespace RESTfulWebAPITask1.Controllers
 {
@@ -7,10 +8,12 @@ namespace RESTfulWebAPITask1.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly CatalogDbContext _dbContext;
-        public ProductController(CatalogDbContext dbContext)
+        private readonly ICategoryService _categoryService;
+        private readonly IProductService _productService;
+        public ProductController(ICategoryService categoryService, IProductService productService)
         {
-            _dbContext = dbContext;
+            _categoryService = categoryService;
+            _productService = productService;
         }
 
 
@@ -18,7 +21,7 @@ namespace RESTfulWebAPITask1.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var product = _dbContext.Products.ToList();
+            var product = _productService.GetAllProducts();
             if (product == null)
                 return NotFound(new { Message = "There is no any product available" });
 
@@ -29,7 +32,7 @@ namespace RESTfulWebAPITask1.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var product = _dbContext.Products.Find(id);
+            var product = _productService.GetProductById(id);
             if (product == null)
                 return NotFound(new { Message = "Product not found" });
 
@@ -47,13 +50,16 @@ namespace RESTfulWebAPITask1.Controllers
             //Category logic
             if (product.CategoryId != null && product.CategoryId > 0)
             {
-                var category = _dbContext.Categories.Find(product.CategoryId);
+                var category = _categoryService.GetCategoryById(product.CategoryId);
                 if (category == null)
                     return NotFound(new { Message = "Category Id not found" });
             }
+            else
+            {
+                return BadRequest("Category Id is required");
+            }
             //
-            _dbContext.Products.Add(product);
-            _dbContext.SaveChanges();
+            _productService.AddProduct(product);
 
             return Ok(new { Message = "Product has been added successfully", Product = product });
         }
@@ -69,13 +75,16 @@ namespace RESTfulWebAPITask1.Controllers
             //Category logic
             if (product.CategoryId != null && product.CategoryId > 0)
             {
-                var category = _dbContext.Categories.Find(product.CategoryId);
+                var category = _categoryService.GetCategoryById(product.CategoryId);
                 if (category == null)
                     return NotFound(new { Message = "Category Id not found" });
             }
+            else
+            {
+                return BadRequest("Category Id is required");
+            }
             //
-            _dbContext.Products.Update(product);
-            _dbContext.SaveChanges();
+            _productService.UpdateProduct(product);
 
             return Ok(new { Message = "Product has been added successfully", Product = product });
         }
@@ -85,12 +94,11 @@ namespace RESTfulWebAPITask1.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var entity = _dbContext.Products.Find(id);
+            var entity = _productService.GetProductById(id);
             if (entity == null)
                 return NotFound(new { Message = "Product not found" });
-            
-            _dbContext.Products.Remove(entity);
-            _dbContext.SaveChanges();
+
+            _productService.DeleteProduct(entity);
 
             return Ok(new { Message = "Product deleted successfully" });
         }

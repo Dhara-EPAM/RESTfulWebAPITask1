@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RESTfulWebAPITask1.Model;
+using RESTfulWebAPITask1.Services;
 
 namespace RESTfulWebAPITask1.Controllers
 {
@@ -7,17 +8,19 @@ namespace RESTfulWebAPITask1.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly CatalogDbContext _dbContext;
-        public CategoryController(CatalogDbContext dbContext)
+        private readonly ICategoryService _categoryService;
+        private readonly IProductService _productService;
+        public CategoryController(ICategoryService categoryService, IProductService productService)
         {
-            _dbContext = dbContext;
+            _categoryService = categoryService;
+            _productService = productService;
         }
 
         // GET: api/<CategoryController>
         [HttpGet]
         public IActionResult Get()
         {
-            var category = _dbContext.Categories.ToList();
+            var category = _categoryService.GetAllCategories();
             if (category == null)
                 return NotFound(new { Message = "There is no any category available" });
 
@@ -28,7 +31,7 @@ namespace RESTfulWebAPITask1.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var category = _dbContext.Categories.Find(id);
+            var category = _categoryService.GetCategoryById(id);
             if (category == null)
                 return NotFound(new { Message = "Category not found" });
 
@@ -45,13 +48,12 @@ namespace RESTfulWebAPITask1.Controllers
             //Parent category id logic
             if(category.ParentCategoryId != null && category.ParentCategoryId > 0)
             {
-                var parentCategory = _dbContext.Categories.Find(category.ParentCategoryId);
+                var parentCategory = _categoryService.GetCategoryById((int)category.ParentCategoryId);
                 if (parentCategory == null)
                     return NotFound(new { Message = "Parent Category Id not found" });
             }
-            //
-            _dbContext.Categories.Add(category);
-            _dbContext.SaveChanges();
+            //Add
+            _categoryService.AddCategory(category);
 
             return Ok(new { Message = "Category has been added successfully", Category = category });
         }
@@ -66,13 +68,12 @@ namespace RESTfulWebAPITask1.Controllers
             //Parent category id logic
             if (category.ParentCategoryId != null && category.ParentCategoryId > 0)
             {
-                var parentCategory = _dbContext.Categories.Find(category.ParentCategoryId);
+                var parentCategory = _categoryService.GetCategoryById((int)category.ParentCategoryId);
                 if (parentCategory == null)
                     return NotFound(new { Message = "Parent Category Id not found" });
             }
-            //
-            _dbContext.Categories.Update(category);
-            _dbContext.SaveChanges();
+            //update
+            _categoryService.UpdateCategory(category);
 
             return Ok(new { Message = "Category has been added successfully", Category = category });
         }
@@ -81,18 +82,16 @@ namespace RESTfulWebAPITask1.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var entity = _dbContext.Categories.Find(id);
+            var entity = _categoryService.GetCategoryById(id);
             if (entity == null)
                 return NotFound(new { Message = "Category not found" });
             
             //Delete related products
-            var products = _dbContext.Products.ToList().Where(x => x.CategoryId == id);
-            _dbContext.Products.RemoveRange(products);
-            _dbContext.SaveChanges();
+            var products = _productService.GetAllProducts()?.Where(x => x.CategoryId == id)?.ToList();
+            _productService.DeleteProducts(products);
 
             //Delete category
-            _dbContext.Categories.Remove(entity);
-            _dbContext.SaveChanges();
+            _categoryService.DeleteCategory(entity);
 
              return Ok(new { Message = "Category deleted successfully" });
          
