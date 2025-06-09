@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RESTfulWebAPITask1.Model;
 using RESTfulWebAPITask1.Services;
 
@@ -18,6 +19,7 @@ namespace RESTfulWebAPITask1.Controllers
 
         // GET: api/<CategoryController>
         [HttpGet]
+        // Read - Accessible by all roles
         public IActionResult Get()
         {
             var category = _categoryService.GetAllCategories();
@@ -29,6 +31,7 @@ namespace RESTfulWebAPITask1.Controllers
 
         // GET api/<CategoryController>/5
         [HttpGet("{id}")]
+        // Read - Accessible by all roles
         public IActionResult Get(int id)
         {
             var category = _categoryService.GetCategoryById(id);
@@ -40,6 +43,7 @@ namespace RESTfulWebAPITask1.Controllers
 
         // POST api/<CategoryController>
         [HttpPost]
+        [Authorize(Roles = "Manager")] // Restricted to Manager role only
         public IActionResult Post(Category category)
         {
             if (category == null)
@@ -60,6 +64,7 @@ namespace RESTfulWebAPITask1.Controllers
 
         // PUT api/<CategoryController>/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Manager")] // Restricted to Manager role only
         public IActionResult Put(int id, Category category)
         {
             if (category == null)
@@ -80,6 +85,7 @@ namespace RESTfulWebAPITask1.Controllers
 
         // DELETE api/<CategoryController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Manager")] // Restricted to Manager role only
         public IActionResult Delete(int id)
         {
             var entity = _categoryService.GetCategoryById(id);
