@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RESTfulWebAPITask1.Model;
 using RESTfulWebAPITask1.Services;
 using Shared;
@@ -22,6 +23,7 @@ namespace RESTfulWebAPITask1.Controllers
 
         // GET: api/<ProductController>
         [HttpGet]
+        // Read - Accessible by all roles
         public IActionResult Get()
         {
             var product = _productService.GetAllProducts();
@@ -33,6 +35,7 @@ namespace RESTfulWebAPITask1.Controllers
 
         // GET api/<ProductController>/5
         [HttpGet("{id}")]
+        // Read - Accessible by all roles 
         public IActionResult Get(int id)
         {
             var product = _productService.GetProductById(id);
@@ -45,6 +48,7 @@ namespace RESTfulWebAPITask1.Controllers
 
         // POST api/<ProductController>
         [HttpPost]
+        [Authorize(Roles = "Manager")] // Restricted to Manager role only
         public IActionResult Post(Product product)
         {
             if (product == null)
@@ -70,6 +74,7 @@ namespace RESTfulWebAPITask1.Controllers
 
         // PUT api/<ProductController>/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Manager")] // Restricted to Manager role only
         public IActionResult Put(int id, Product product)
         {
             if (product == null)
@@ -126,6 +131,7 @@ namespace RESTfulWebAPITask1.Controllers
 
         // DELETE api/<ProductController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Manager")] // Restricted to Manager role only
         public IActionResult Delete(int id)
         {
             var entity = _productService.GetProductById(id);
