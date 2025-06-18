@@ -53,7 +53,7 @@ namespace RESTfulWebAPITask1.Controllers
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            Claim[] claims = new[]
             {
             new Claim(ClaimTypes.Role, role),
             new Claim(ClaimTypes.Name, "Authenticated User")
@@ -72,13 +72,13 @@ namespace RESTfulWebAPITask1.Controllers
 
     public class LoginRequest
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public required string Username { get; set; }
+        public required string Password { get; set; }
     }
     public class RefreshTokenRequest
     {
-        public string RefreshToken { get; set; }
-        public string Role { get; set; }
+        public required string RefreshToken { get; set; }
+        public required string Role { get; set; }
     }
 
 }
