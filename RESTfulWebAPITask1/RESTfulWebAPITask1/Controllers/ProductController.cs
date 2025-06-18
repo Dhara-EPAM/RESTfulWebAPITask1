@@ -26,7 +26,7 @@ namespace RESTfulWebAPITask1.Controllers
         // Read - Accessible by all roles
         public IActionResult Get()
         {
-            var product = _productService.GetAllProducts();
+            List<Product> product = _productService.GetAllProducts();
             if (product == null)
                 return NotFound(new { Message = "There is no any product available" });
 
@@ -38,7 +38,7 @@ namespace RESTfulWebAPITask1.Controllers
         // Read - Accessible by all roles 
         public IActionResult Get(int id)
         {
-            var product = _productService.GetProductById(id);
+            Product product = _productService.GetProductById(id);
             if (product == null)
                 return NotFound(new { Message = "Product not found" });
 
@@ -55,9 +55,9 @@ namespace RESTfulWebAPITask1.Controllers
                 return BadRequest("Product details are required");
 
             //Category logic
-            if (product.CategoryId != null && product.CategoryId > 0)
+            if (product != null && product.CategoryId > 0)
             {
-                var category = _categoryService.GetCategoryById(product.CategoryId);
+                Category category = _categoryService.GetCategoryById(product.CategoryId);
                 if (category == null)
                     return NotFound(new { Message = "Category Id not found" });
             }
@@ -81,9 +81,9 @@ namespace RESTfulWebAPITask1.Controllers
                 return BadRequest("Product details are required");
             
             //Category logic
-            if (product.CategoryId != null && product.CategoryId > 0)
+            if (product != null && product.CategoryId > 0)
             {
-                var category = _categoryService.GetCategoryById(product.CategoryId);
+                Category category = _categoryService.GetCategoryById(product.CategoryId);
                 if (category == null)
                     return NotFound(new { Message = "Category Id not found" });
             }
@@ -105,9 +105,9 @@ namespace RESTfulWebAPITask1.Controllers
                 return BadRequest("Product details are required");
 
             //Category logic
-            if (product.CategoryId != null && product.CategoryId > 0)
+            if (product != null && product.CategoryId > 0)
             {
-                var category = _categoryService.GetCategoryById(product.CategoryId);
+                Category category = _categoryService.GetCategoryById(product.CategoryId);
                 if (category == null)
                     return NotFound(new { Message = "Category Id not found" });
             }
@@ -134,7 +134,7 @@ namespace RESTfulWebAPITask1.Controllers
         [Authorize(Roles = "Manager")] // Restricted to Manager role only
         public IActionResult Delete(int id)
         {
-            var entity = _productService.GetProductById(id);
+            Product entity = _productService.GetProductById(id);
             if (entity == null)
                 return NotFound(new { Message = "Product not found" });
 

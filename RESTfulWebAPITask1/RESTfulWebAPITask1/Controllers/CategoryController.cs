@@ -22,7 +22,7 @@ namespace RESTfulWebAPITask1.Controllers
         // Read - Accessible by all roles
         public IActionResult Get()
         {
-            var category = _categoryService.GetAllCategories();
+            List<Category> category = _categoryService.GetAllCategories();
             if (category == null)
                 return NotFound(new { Message = "There is no any category available" });
 
@@ -34,7 +34,7 @@ namespace RESTfulWebAPITask1.Controllers
         // Read - Accessible by all roles
         public IActionResult Get(int id)
         {
-            var category = _categoryService.GetCategoryById(id);
+            Category category = _categoryService.GetCategoryById(id);
             if (category == null)
                 return NotFound(new { Message = "Category not found" });
 
@@ -52,7 +52,7 @@ namespace RESTfulWebAPITask1.Controllers
             //Parent category id logic
             if(category.ParentCategoryId != null && category.ParentCategoryId > 0)
             {
-                var parentCategory = _categoryService.GetCategoryById((int)category.ParentCategoryId);
+                Category parentCategory = _categoryService.GetCategoryById((int)category.ParentCategoryId);
                 if (parentCategory == null)
                     return NotFound(new { Message = "Parent Category Id not found" });
             }
@@ -73,7 +73,7 @@ namespace RESTfulWebAPITask1.Controllers
             //Parent category id logic
             if (category.ParentCategoryId != null && category.ParentCategoryId > 0)
             {
-                var parentCategory = _categoryService.GetCategoryById((int)category.ParentCategoryId);
+                Category parentCategory = _categoryService.GetCategoryById((int)category.ParentCategoryId);
                 if (parentCategory == null)
                     return NotFound(new { Message = "Parent Category Id not found" });
             }
@@ -88,13 +88,14 @@ namespace RESTfulWebAPITask1.Controllers
         [Authorize(Roles = "Manager")] // Restricted to Manager role only
         public IActionResult Delete(int id)
         {
-            var entity = _categoryService.GetCategoryById(id);
+            Category entity = _categoryService.GetCategoryById(id);
             if (entity == null)
                 return NotFound(new { Message = "Category not found" });
             
             //Delete related products
             var products = _productService.GetAllProducts()?.Where(x => x.CategoryId == id)?.ToList();
-            _productService.DeleteProducts(products);
+            if(products != null)
+                _productService.DeleteProducts(products);
 
             //Delete category
             _categoryService.DeleteCategory(entity);
