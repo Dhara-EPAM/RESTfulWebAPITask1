@@ -15,7 +15,9 @@ namespace RESTfulWebAPITask1.Services
         }
         public Category GetCategoryById(int id)
         {
+#pragma warning disable CS8603 // Possible null reference return.
             return _dbContext.Categories.Find(id);
+#pragma warning restore CS8603 // Possible null reference return.
         }
         public void AddCategory(Category category)
         {
