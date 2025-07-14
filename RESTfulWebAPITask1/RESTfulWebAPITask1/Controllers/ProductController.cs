@@ -45,6 +45,19 @@ namespace RESTfulWebAPITask1.Controllers
             return Ok(product);
         }
 
+        // Hardcoded product properties for demonstration purposes
+        [HttpGet("{id}/properties")]
+        public ActionResult<Dictionary<string, string>> GetProductProperties(int id)
+        {
+            var productProperties = new Dictionary<string, string>
+        {
+            { "category", "Samsung" },
+            { "model", "S10" },
+            { "releaseYear", "2019" }
+        };
+
+            return Ok(productProperties);
+        }
 
         // POST api/<ProductController>
         [HttpPost]
