@@ -1,0 +1,46 @@
+version: '3.9'
+services:
+  # SQL Server Dependency
+  sql-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest    #using inbuilt image
+    container_name: sql-db
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "<useyourpassowordhere>"
+    ports:
+      - "1433:1433"
+    networks:
+      - app-network
+
+  # RabbitMQ Dependency
+  rabbitmq:
+    image: rabbitmq:3-management     #using inbuilt image
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"  
+      - "15672:15672"
+    networks:
+      - app-network
+
+  # Catalog Service
+  restfulwebapitask1:
+    build:
+      context: ./restfulwebapitask1
+      dockerfile: ./restfulwebapitask1/Dockerfile
+    container_name: catalog
+    ports:
+      - "5000:80"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionStrings__DefaultConnection: "Server=sql-db,1433;Database=CatalogServiceDB;User=sa;Password=useyourpassowordhere;"
+    depends_on:
+      - sql-db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
